@@ -8,7 +8,7 @@ pygame.init()
 GRID_WIDTH, GRID_HEIGHT = 15, 15
 MAX_SQ_WIDTH, MAX_SQ_HEIGHT = 50, 50
 SQ_SIZE = 50
-BOMBS_NO = 15
+BOMBS_NO = 40
 
 SCREEN_WIDTH = SQ_SIZE * GRID_WIDTH
 SCREEN_HEIGHT = SQ_SIZE * GRID_WIDTH
@@ -43,7 +43,6 @@ for cell_status in CellStatus:
     scaled_img = pygame.transform.scale(img, (SQ_SIZE, SQ_SIZE))
     IMAGES[cell_status] = scaled_img
 
-
 clock = pygame.time.Clock()
 
 
@@ -57,7 +56,9 @@ while running:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                game.process_click(event.pos[0], event.pos[1])
+                game.process_left_click(event.pos[0], event.pos[1])
+            if event.button == 3:
+                game.process_right_click(event.pos[0], event.pos[1])
 
     screen.fill((255, 255, 255))
 
