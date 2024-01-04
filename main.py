@@ -44,10 +44,10 @@ for cell_status in CellStatus:
     scaled_img = pygame.transform.scale(img, (SQ_SIZE, SQ_SIZE))
     IMAGES[cell_status] = scaled_img
 
-clock = pygame.time.Clock()
-
 
 game_handler = GameHandler(screen, SCREEN_WIDTH, TOP_BAR_HEIGHT, GRID_WIDTH, GRID_HEIGHT, SQ_SIZE, BOMBS_NO)
+clock = pygame.time.Clock()
+
 running = True
 
 while running:
@@ -61,7 +61,6 @@ while running:
                 game_handler.process_left_click(event.pos[0], event.pos[1])
             if event.button == 3:
                 game_handler.process_right_click(event.pos[0], event.pos[1])
-
 
 
     screen.fill(GRAY)
