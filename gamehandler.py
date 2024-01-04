@@ -2,10 +2,19 @@ import pygame
 
 from minesweeper import Minesweeper
 
-RESET_BTN_SIZE = 50
+BTN_SIZE = 50
 CTR_PADDING = 10
 CTR_HEIGHT = 60
 CTR_WIDTH = 100
+
+HAPPY_PATH = "resources/images/happy.png"
+DEAD_PATH = "resources/images/dead.png"
+QUESTION_PATH = "resources/images/question_face.png"
+
+
+def load_and_scale_image(image_path):
+    img = pygame.image.load(image_path)
+    return pygame.transform.scale(img, (BTN_SIZE, BTN_SIZE))
 
 
 class GameHandler:
@@ -17,7 +26,10 @@ class GameHandler:
         self.top_bar_height = top_bar_height
 
         self.game = Minesweeper(self.grid_width, self.grid_height, self.sq_size, self.bombs_no, top_bar_height)
-        self.reset_button = ResetButton(screen, (width - RESET_BTN_SIZE) // 2, (top_bar_height - RESET_BTN_SIZE) // 2)
+        self.reset_button = Button(screen, HAPPY_PATH, width // 2 - BTN_SIZE,
+                                   (top_bar_height - BTN_SIZE) // 2)
+        self.customize_button = Button(screen, QUESTION_PATH, width // 2,
+                                       (top_bar_height - BTN_SIZE) // 2)
         self.bombs_count = BombsCount(screen, CTR_PADDING, (top_bar_height - CTR_HEIGHT) // 2,
                                       CTR_WIDTH, CTR_HEIGHT)
 
@@ -27,6 +39,7 @@ class GameHandler:
 
     def draw(self):
         self.reset_button.draw()
+        self.customize_button.draw()
         self.bombs_count.draw()
         self.timer.update()
         self.timer.draw()
@@ -37,6 +50,8 @@ class GameHandler:
         elif self.reset_button.is_clicked(mouse_x, mouse_y):
             self.game = Minesweeper(self.grid_width, self.grid_height, self.sq_size, self.bombs_no, self.top_bar_height)
             self.timer.reset()
+        elif self.customize_button.is_clicked(mouse_x, mouse_y):
+            pass
 
     def process_right_click(self, mouse_x, mouse_y):
         if mouse_y > self.top_bar_height:
@@ -44,24 +59,18 @@ class GameHandler:
             self.bombs_count.set_bombs_no(self.bombs_no - self.game.flags_no)
 
 
-HAPPY_PATH = "resources/images/happy.png"
-DEAD_PATH = "resources/images/dead.png"
-
-img = pygame.image.load(HAPPY_PATH)
-happy_img = pygame.transform.scale(img, (RESET_BTN_SIZE, RESET_BTN_SIZE))
-
-
-class ResetButton:
-    def __init__(self, screen, x, y):
+class Button:
+    def __init__(self, screen, img_path, x, y):
         self.screen = screen
-        self.happy_rect = happy_img.get_rect(topleft=(x, y))
+        self.rect = pygame.Rect(x, y, BTN_SIZE, BTN_SIZE)
+        self.img = load_and_scale_image(img_path)
 
     def draw(self):
-        self.screen.blit(happy_img, self.happy_rect)
+        self.screen.blit(self.img, self.rect)
 
     def is_clicked(self, mouse_x, mouse_y):
-        if self.happy_rect.collidepoint(mouse_x, mouse_y):
-            print("reset btn clicked")
+        if self.rect.collidepoint(mouse_x, mouse_y):
+            print("btn clicked")
             return True
 
 
