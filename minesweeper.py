@@ -42,7 +42,6 @@ class Square:
             self.status = CellStatus.UNKNOWN
 
 
-
 class Minesweeper:
     def __init__(self, grid_width, grid_height, sq_size, bombs_no, top_bar_height):
         self.BOMBS_NO = bombs_no
@@ -137,6 +136,3 @@ class Minesweeper:
             for square in line:
                 if square.is_bomb:
                     square.status = CellStatus.BOMB
-
-
-

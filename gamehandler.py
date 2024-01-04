@@ -1,6 +1,34 @@
+from enum import Enum
+
 import pygame
 
-from minesweeper import Minesweeper
+from minesweeper import Minesweeper, CellStatus
+
+SQ_SIZE = 30
+
+IMG_PATHS = {
+    CellStatus.UNKNOWN: 'resources/images/blank_cell.png',
+    CellStatus.ONE: 'resources/images/one.png',
+    CellStatus.TWO: 'resources/images/two.png',
+    CellStatus.THREE: 'resources/images/three.png',
+    CellStatus.FOUR: 'resources/images/four.png',
+    CellStatus.FIVE: 'resources/images/five.png',
+    CellStatus.SIX: 'resources/images/six.png',
+    CellStatus.SEVEN: 'resources/images/seven.png',
+    CellStatus.EIGHT: 'resources/images/eight.png',
+    CellStatus.BOMB: 'resources/images/bomb.png',
+    CellStatus.BOOM: 'resources/images/boom.png',
+    CellStatus.SAFE: 'resources/images/gray_cell.png',
+    CellStatus.FLAGGED: 'resources/images/flag.png',
+}
+
+IMAGES = {}
+
+for cell_status in CellStatus:
+    img = pygame.image.load(IMG_PATHS[cell_status])
+    scaled_img = pygame.transform.scale(img, (SQ_SIZE, SQ_SIZE))
+    IMAGES[cell_status] = scaled_img
+
 
 BTN_SIZE = 50
 CTR_PADDING = 10
@@ -19,6 +47,7 @@ def load_and_scale_image(image_path):
 
 class GameHandler:
     def __init__(self, screen, width, top_bar_height, grid_width, grid_height, sq_size, bombs_no):
+        self.screen = screen
         self.bombs_no = bombs_no
         self.sq_size = sq_size
         self.grid_height = grid_height
@@ -38,6 +67,10 @@ class GameHandler:
         self.bombs_count.set_bombs_no(bombs_no)
 
     def draw(self):
+        for row in self.game.squares:
+            for square in row:
+                self.screen.blit(IMAGES[square.status], square.position)
+
         self.reset_button.draw()
         self.customize_button.draw()
         self.bombs_count.draw()
@@ -54,7 +87,7 @@ class GameHandler:
             pass
 
     def process_right_click(self, mouse_x, mouse_y):
-        if mouse_y > self.top_bar_height:
+        if mouse_y > self.top_bar_height and not self.game.is_over:
             self.game.process_right_click(mouse_x, mouse_y)
             self.bombs_count.set_bombs_no(self.bombs_no - self.game.flags_no)
 
