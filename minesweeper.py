@@ -1,8 +1,5 @@
 import random
 from enum import Enum
-from math import trunc
-
-from pip._internal.utils.misc import tabulate
 
 
 class CellStatus(Enum):
@@ -57,6 +54,7 @@ class Minesweeper:
         self.squares = [[Square((j * self.SQ_SIZE, i * self.SQ_SIZE + self.top_bar_height), CellStatus.UNKNOWN, self.bombs[i][j])
                          for j in range(grid_width)] for i in range(grid_height)]
         self.is_over = False
+        self.flags_no = 0
 
     def generate_bombs(self):
         bombs_pos = random.sample(
@@ -101,7 +99,12 @@ class Minesweeper:
         if clicked_square is None:
             return
         print(f'square {line}, {col} was right clicked')
-        clicked_square.toggle_flag()
+        if clicked_square.status == CellStatus.UNKNOWN:
+            clicked_square.status = CellStatus.FLAGGED
+            self.flags_no += 1
+        elif clicked_square.status == CellStatus.FLAGGED:
+            clicked_square.status = CellStatus.UNKNOWN
+            self.flags_no -= 1
 
     def get_clicked_square(self, mouse_x, mouse_y):
         col, line = mouse_x // self.SQ_SIZE, (mouse_y - self.top_bar_height) // self.SQ_SIZE

@@ -5,7 +5,7 @@ from minesweeper import Minesweeper, CellStatus
 
 pygame.init()
 
-GRID_WIDTH, GRID_HEIGHT = 15, 30
+GRID_WIDTH, GRID_HEIGHT = 15, 20
 MAX_SQ_WIDTH, MAX_SQ_HEIGHT = 50, 50
 SQ_SIZE = 30
 BOMBS_NO = 40
@@ -60,8 +60,8 @@ while running:
             if event.button == 1:
                 game_handler.process_left_click(event.pos[0], event.pos[1])
             if event.button == 3:
-                if event.pos[1] > TOP_BAR_HEIGHT:
-                    game.process_right_click(event.pos[0], event.pos[1])
+                game_handler.process_right_click(event.pos[0], event.pos[1])
+
 
 
     screen.fill(GRAY)
