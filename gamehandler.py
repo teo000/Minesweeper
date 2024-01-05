@@ -55,14 +55,14 @@ class GameHandler:
         self.top_bar_height = top_bar_height
 
         self.game = Minesweeper(self.grid_width, self.grid_height, self.sq_size, self.bombs_no, top_bar_height)
-        self.reset_button = Button(screen, HAPPY_PATH, width // 2 - BTN_SIZE,
+        self.reset_button = Button(HAPPY_PATH, width // 2 - BTN_SIZE,
                                    (top_bar_height - BTN_SIZE) // 2)
-        self.customize_button = Button(screen, QUESTION_PATH, width // 2,
+        self.customize_button = Button(QUESTION_PATH, width // 2,
                                        (top_bar_height - BTN_SIZE) // 2)
-        self.bombs_count = BombsCount(screen, CTR_PADDING, (top_bar_height - CTR_HEIGHT) // 2,
+        self.bombs_count = BombsCount(CTR_PADDING, (top_bar_height - CTR_HEIGHT) // 2,
                                       CTR_WIDTH, CTR_HEIGHT)
 
-        self.timer = Timer(screen, width - CTR_PADDING - CTR_WIDTH, (top_bar_height - CTR_HEIGHT) // 2,
+        self.timer = Timer(width - CTR_PADDING - CTR_WIDTH, (top_bar_height - CTR_HEIGHT) // 2,
                            CTR_WIDTH, CTR_HEIGHT)
         self.bombs_count.set_bombs_no(bombs_no)
 
@@ -71,11 +71,11 @@ class GameHandler:
             for square in row:
                 self.screen.blit(IMAGES[square.status], square.position)
 
-        self.reset_button.draw()
-        self.customize_button.draw()
-        self.bombs_count.draw()
+        self.reset_button.draw(self.screen)
+        self.customize_button.draw(self.screen)
+        self.bombs_count.draw(self.screen)
         self.timer.update()
-        self.timer.draw()
+        self.timer.draw(self.screen)
 
     def process_left_click(self, mouse_x, mouse_y):
         if mouse_y > self.top_bar_height and not self.game.is_over:
@@ -93,13 +93,12 @@ class GameHandler:
 
 
 class Button:
-    def __init__(self, screen, img_path, x, y):
-        self.screen = screen
+    def __init__(self, img_path, x, y):
         self.rect = pygame.Rect(x, y, BTN_SIZE, BTN_SIZE)
         self.img = load_and_scale_image(img_path)
 
-    def draw(self):
-        self.screen.blit(self.img, self.rect)
+    def draw(self, screen):
+        screen.blit(self.img, self.rect)
 
     def is_clicked(self, mouse_x, mouse_y):
         if self.rect.collidepoint(mouse_x, mouse_y):
@@ -113,19 +112,18 @@ default_font = pygame.font.get_default_font()
 
 
 class Counter:
-    def __init__(self, screen, x, y, width, height):
-        self.screen = screen
+    def __init__(self, x, y, width, height):
         self.rect = pygame.Rect(x, y, width, height)
         self.font = pygame.font.Font(default_font, 36)
         self.surface = pygame.Surface((width, height))
 
-    def draw(self):
-        self.screen.blit(self.surface, self.rect)
+    def draw(self, screen):
+        screen.blit(self.surface, self.rect)
 
 
 class BombsCount(Counter):
-    def __init__(self, screen, x, y, width, height):
-        super().__init__(screen, x, y, width, height)
+    def __init__(self, x, y, width, height):
+        super().__init__(x, y, width, height)
 
     def set_bombs_no(self, bombs_no):
         self.surface.fill(BLACK)
@@ -135,8 +133,8 @@ class BombsCount(Counter):
 
 
 class Timer(Counter):
-    def __init__(self, screen, x, y, width, height):
-        super().__init__(screen, x, y, width, height)
+    def __init__(self, x, y, width, height):
+        super().__init__(x, y, width, height)
         self.counts_up = True
         self.initial_time = pygame.time.get_ticks()
 
