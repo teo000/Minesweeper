@@ -1,7 +1,6 @@
-from enum import Enum
-
 import pygame
 
+from game_options import GameOptions
 from minesweeper import Minesweeper, CellStatus
 
 SQ_SIZE = 30
@@ -39,6 +38,11 @@ HAPPY_PATH = "resources/images/happy.png"
 DEAD_PATH = "resources/images/dead.png"
 QUESTION_PATH = "resources/images/question_face.png"
 
+GRAY = (200, 200, 200)
+
+SQ_SIZE = 30
+TOP_BAR_HEIGHT = 100
+
 
 def load_and_scale_image(image_path):
     img = pygame.image.load(image_path)
@@ -46,50 +50,78 @@ def load_and_scale_image(image_path):
 
 
 class GameHandler:
-    def __init__(self, screen, width, top_bar_height, grid_width, grid_height, sq_size, bombs_no):
-        self.screen = screen
-        self.bombs_no = bombs_no
-        self.sq_size = sq_size
-        self.grid_height = grid_height
-        self.grid_width = grid_width
-        self.top_bar_height = top_bar_height
+    def __init__(self, game_options: GameOptions, is_timed=False, time_limit=None):
+        self.bombs_no = game_options.bombs_no
+        self.grid_height = game_options.grid_height
+        self.grid_width = game_options.grid_width
+        width = self.grid_width * SQ_SIZE
 
-        self.game = Minesweeper(self.grid_width, self.grid_height, self.sq_size, self.bombs_no, top_bar_height)
+        self.game = Minesweeper(self.grid_width, self.grid_height, SQ_SIZE, self.bombs_no, TOP_BAR_HEIGHT)
         self.reset_button = Button(HAPPY_PATH, width // 2 - BTN_SIZE,
-                                   (top_bar_height - BTN_SIZE) // 2)
-        self.customize_button = Button(QUESTION_PATH, width // 2,
-                                       (top_bar_height - BTN_SIZE) // 2)
-        self.bombs_count = BombsCount(CTR_PADDING, (top_bar_height - CTR_HEIGHT) // 2,
+                                   (TOP_BAR_HEIGHT - BTN_SIZE) // 2)
+        self.menu_button = Button(QUESTION_PATH, width // 2,
+                                  (TOP_BAR_HEIGHT - BTN_SIZE) // 2)
+        self.bombs_count = BombsCount(CTR_PADDING, (TOP_BAR_HEIGHT - CTR_HEIGHT) // 2,
                                       CTR_WIDTH, CTR_HEIGHT)
 
-        self.timer = Timer(width - CTR_PADDING - CTR_WIDTH, (top_bar_height - CTR_HEIGHT) // 2,
+        self.timer = Timer(width - CTR_PADDING - CTR_WIDTH, (TOP_BAR_HEIGHT - CTR_HEIGHT) // 2,
                            CTR_WIDTH, CTR_HEIGHT)
-        self.bombs_count.set_bombs_no(bombs_no)
+        self.bombs_count.set_bombs_no(self.bombs_no)
+
+        screen_width = self.grid_width * SQ_SIZE
+        screen_height = self.grid_height * SQ_SIZE + TOP_BAR_HEIGHT
+
+        self.screen = pygame.display.set_mode([screen_width, screen_height])
+        self.return_to_menu = False
 
     def draw(self):
+        self.screen.fill(GRAY)
+
         for row in self.game.squares:
             for square in row:
                 self.screen.blit(IMAGES[square.status], square.position)
 
         self.reset_button.draw(self.screen)
-        self.customize_button.draw(self.screen)
+        self.menu_button.draw(self.screen)
         self.bombs_count.draw(self.screen)
-        self.timer.update()
         self.timer.draw(self.screen)
 
     def process_left_click(self, mouse_x, mouse_y):
-        if mouse_y > self.top_bar_height and not self.game.is_over:
+        if mouse_y > TOP_BAR_HEIGHT and not self.game.is_over:
             self.game.process_left_click(mouse_x, mouse_y)
         elif self.reset_button.is_clicked(mouse_x, mouse_y):
-            self.game = Minesweeper(self.grid_width, self.grid_height, self.sq_size, self.bombs_no, self.top_bar_height)
+            self.game = Minesweeper(self.grid_width, self.grid_height, SQ_SIZE, self.bombs_no, TOP_BAR_HEIGHT)
             self.timer.reset()
-        elif self.customize_button.is_clicked(mouse_x, mouse_y):
-            pass
+        elif self.menu_button.is_clicked(mouse_x, mouse_y):
+            self.return_to_menu = True
 
     def process_right_click(self, mouse_x, mouse_y):
-        if mouse_y > self.top_bar_height and not self.game.is_over:
+        if mouse_y > TOP_BAR_HEIGHT and not self.game.is_over:
             self.game.process_right_click(mouse_x, mouse_y)
             self.bombs_count.set_bombs_no(self.bombs_no - self.game.flags_no)
+
+    def game_loop(self):
+        clock = pygame.time.Clock()
+
+        while not self.return_to_menu:
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    quit()
+                if event.type == pygame.MOUSEBUTTONUP:
+                    if event.button == 1:
+                        self.process_left_click(event.pos[0], event.pos[1])
+                    if event.button == 3:
+                        self.process_right_click(event.pos[0], event.pos[1])
+
+            if not self.game.is_over:
+                self.timer.update()
+
+            self.draw()
+
+            pygame.display.flip()
+            clock.tick(60)
+
 
 
 class Button:
