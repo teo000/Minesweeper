@@ -32,7 +32,7 @@ for cell_status in CellStatus:
 BTN_SIZE = 50
 CTR_PADDING = 10
 CTR_HEIGHT = 60
-CTR_WIDTH = 100
+CTR_WIDTH = 60
 
 HAPPY_PATH = "resources/images/happy.png"
 DEAD_PATH = "resources/images/dead.png"
@@ -146,7 +146,7 @@ default_font = pygame.font.get_default_font()
 class Counter:
     def __init__(self, x, y, width, height):
         self.rect = pygame.Rect(x, y, width, height)
-        self.font = pygame.font.Font(default_font, 36)
+        self.font = pygame.font.Font(default_font, 28)
         self.surface = pygame.Surface((width, height))
 
     def draw(self, screen):

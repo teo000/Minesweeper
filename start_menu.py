@@ -1,15 +1,25 @@
 import pygame
 import pygame_menu
-
 import game_options
 from gamehandler import GameHandler
 
 
 def menu_loop():
     def submit_onclick():
-        game_handler = GameHandler(game_options.MEDIUM)
+        difficulty = difficulty_selector.get_value()[0][1]
+        if difficulty == game_options.CUSTOM:
+            lines = lines_input.get_value()
+            columns = columns_input.get_value()
+            bombs = bombs_input.get_value()
+            if not check_valid(lines, columns, bombs):
+                return
+            difficulty = game_options.GameOptions(lines, columns, bombs)
+        game_handler = GameHandler(difficulty)
         game_handler.game_loop()
         pygame.display.set_mode((500, 500))
+
+    def check_valid(lines, columns, bombs):
+        return True
 
     def timed_mode_onclick():
         timer_input.hide()
@@ -22,7 +32,7 @@ def menu_loop():
         timed_mode.show()
 
     def select_difficulty(selected_value, difficulty):
-        if difficulty == 'Custom':
+        if difficulty == game_options.CUSTOM:
             lines_input.show()
             columns_input.show()
             bombs_input.show()
@@ -32,6 +42,7 @@ def menu_loop():
             bombs_input.hide()
 
     pygame.init()
+
     surface = pygame.display.set_mode((500, 500))
 
     menu = pygame_menu.Menu('Minesweeper', 500, 500,
@@ -40,9 +51,10 @@ def menu_loop():
     icon_image = pygame.image.load('resources/images/bomb.png')
     pygame.display.set_icon(icon_image)
 
-    items = [('Easy', 'Easy'), ('Medium', 'Medium'), ('Hard', 'Hard'), ('Custom', 'Custom')]
+    items = [('Easy', game_options.EASY), ('Medium', game_options.MEDIUM), ('Hard', game_options.HARD),
+             ('Custom', game_options.CUSTOM)]
 
-    menu.add.selector(
+    difficulty_selector = menu.add.selector(
         title='Difficulty:\t',
         items=items,
         onreturn=select_difficulty,

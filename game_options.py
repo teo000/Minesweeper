@@ -24,3 +24,4 @@ HARD = GameOptions(
     grid_width=30
 )
 
+CUSTOM = None
