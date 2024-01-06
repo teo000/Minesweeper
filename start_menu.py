@@ -3,10 +3,16 @@ import pygame_menu
 import game_options
 from gamehandler import GameHandler
 
+# display_info = pygame.display.Info()
+# WINDOW_WIDTH, WINDOW_HEIGHT = display_info.current_w // 2, display_info.current_h // 2
+
 
 def menu_loop():
     def submit_onclick():
         difficulty = difficulty_selector.get_value()[0][1]
+        is_timed = timed_mode.is_visible()
+        time_limit = timer_input.get_value() if is_timed else None
+
         if difficulty == game_options.CUSTOM:
             lines = lines_input.get_value()
             columns = columns_input.get_value()
@@ -14,7 +20,7 @@ def menu_loop():
             if not check_valid(lines, columns, bombs):
                 return
             difficulty = game_options.GameOptions(lines, columns, bombs)
-        game_handler = GameHandler(difficulty)
+        game_handler = GameHandler(difficulty, is_timed, time_limit)
         game_handler.game_loop()
         pygame.display.set_mode((500, 500))
 

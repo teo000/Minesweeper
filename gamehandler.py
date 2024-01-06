@@ -51,6 +51,7 @@ def load_and_scale_image(image_path):
 
 class GameHandler:
     def __init__(self, game_options: GameOptions, is_timed=False, time_limit=None):
+        self.is_timed = is_timed
         self.bombs_no = game_options.bombs_no
         self.grid_height = game_options.grid_height
         self.grid_width = game_options.grid_width
@@ -65,7 +66,7 @@ class GameHandler:
                                       CTR_WIDTH, CTR_HEIGHT)
 
         self.timer = Timer(width - CTR_PADDING - CTR_WIDTH, (TOP_BAR_HEIGHT - CTR_HEIGHT) // 2,
-                           CTR_WIDTH, CTR_HEIGHT)
+                           CTR_WIDTH, CTR_HEIGHT, count_backwards=is_timed, time_limit=time_limit)
         self.bombs_count.set_bombs_no(self.bombs_no)
 
         screen_width = self.grid_width * SQ_SIZE
@@ -82,6 +83,7 @@ class GameHandler:
                 self.screen.blit(IMAGES[square.status], square.position)
 
         self.reset_button.draw(self.screen)
+
         self.menu_button.draw(self.screen)
         self.bombs_count.draw(self.screen)
         self.timer.draw(self.screen)
@@ -90,8 +92,10 @@ class GameHandler:
         if mouse_y > TOP_BAR_HEIGHT and not self.game.is_over:
             self.game.process_left_click(mouse_x, mouse_y)
         elif self.reset_button.is_clicked(mouse_x, mouse_y):
-            self.game = Minesweeper(self.grid_width, self.grid_height, SQ_SIZE, self.bombs_no, TOP_BAR_HEIGHT)
             self.timer.reset()
+            self.bombs_count.set_bombs_no(self.bombs_no)
+            self.game = Minesweeper(self.grid_width, self.grid_height, SQ_SIZE, self.bombs_no, TOP_BAR_HEIGHT)
+            self.reset_button.img = load_and_scale_image(HAPPY_PATH)
         elif self.menu_button.is_clicked(mouse_x, mouse_y):
             self.return_to_menu = True
 
@@ -114,14 +118,19 @@ class GameHandler:
                     if event.button == 3:
                         self.process_right_click(event.pos[0], event.pos[1])
 
+            if self.is_timed and self.timer.time == 0:
+                self.game.is_over = True
+
             if not self.game.is_over:
                 self.timer.update()
+
+            if self.game.is_over:
+                self.reset_button.img = load_and_scale_image(DEAD_PATH)
 
             self.draw()
 
             pygame.display.flip()
             clock.tick(60)
-
 
 
 class Button:
@@ -165,19 +174,32 @@ class BombsCount(Counter):
 
 
 class Timer(Counter):
-    def __init__(self, x, y, width, height):
+    def __init__(self, x, y, width, height, count_backwards=False, time_limit=None):
         super().__init__(x, y, width, height)
-        self.counts_up = True
         self.initial_time = pygame.time.get_ticks()
+        self.time_limit = time_limit + 1 if time_limit is not None else None
+        self.get_current_time = self.count_backwards if count_backwards else self.count_forward
+        self.time = self.get_current_time()
 
     def update(self):
         self.surface.fill(BLACK)
-        time = (pygame.time.get_ticks() - self.initial_time) // 1000
-        if time > 999:
-            time = 999
-        timer_text = self.font.render(str(time), True, WHITE)
+        self.time = self.get_current_time()
+        timer_text = self.font.render(str(self.time), True, WHITE)
         rect = timer_text.get_rect(center=self.surface.get_rect().center)
         self.surface.blit(timer_text, rect)
 
+    def count_forward(self):
+        time = (pygame.time.get_ticks() - self.initial_time) // 1000
+        if time > 999:
+            time = 999
+        return time
+
+    def count_backwards(self):
+        time = self.time_limit + (self.initial_time - pygame.time.get_ticks()) // 1000
+        if time < 0:
+            time = 0
+        return time
+
     def reset(self):
         self.initial_time = pygame.time.get_ticks()
+        self.time = self.get_current_time()
