@@ -3,8 +3,14 @@ import pygame
 from game_options import GameOptions
 from minesweeper import Minesweeper, CellStatus
 
-SQ_SIZE = 30
-TOP_BAR_HEIGHT = 100
+pygame.init()
+display_info = pygame.display.Info()
+WINDOW_WIDTH, WINDOW_HEIGHT = display_info.current_w, display_info.current_h
+
+print(WINDOW_WIDTH, WINDOW_HEIGHT)
+
+SQ_SIZE = WINDOW_HEIGHT / 33
+TOP_BAR_HEIGHT = 3 * SQ_SIZE
 
 IMG_PATHS = {
     CellStatus.UNKNOWN: 'resources/images/blank_cell.png',
@@ -30,13 +36,14 @@ for cell_status in CellStatus:
     IMAGES[cell_status] = scaled_img
 
 
-BTN_SIZE = 50
-CTR_PADDING = 10
-CTR_HEIGHT = 60
-CTR_WIDTH = 60
+BTN_SIZE = 5/3 * SQ_SIZE
+CTR_PADDING = 1/3 * SQ_SIZE
+CTR_HEIGHT = 2 * SQ_SIZE
+CTR_WIDTH = 2 * SQ_SIZE
 
 HAPPY_PATH = "resources/images/happy.png"
 DEAD_PATH = "resources/images/dead.png"
+COOL_PATH = "resources/images/cool.jpg"
 QUESTION_PATH = "resources/images/question_face.png"
 
 GRAY = (200, 200, 200)
@@ -71,6 +78,7 @@ class GameHandler:
         screen_height = self.grid_height * SQ_SIZE + TOP_BAR_HEIGHT
 
         self.screen = pygame.display.set_mode([screen_width, screen_height])
+        self.draw_counters = True if width > 7 * SQ_SIZE else False
         self.return_to_menu = False
 
     def draw(self):
@@ -81,13 +89,13 @@ class GameHandler:
                 self.screen.blit(IMAGES[square.status], square.position)
 
         self.reset_button.draw(self.screen)
-
         self.menu_button.draw(self.screen)
-        self.bombs_count.draw(self.screen)
-        self.timer.draw(self.screen)
+        if self.draw_counters:
+            self.bombs_count.draw(self.screen)
+            self.timer.draw(self.screen)
 
     def process_left_click(self, mouse_x, mouse_y):
-        if mouse_y > TOP_BAR_HEIGHT and not self.game.is_over:
+        if mouse_y > TOP_BAR_HEIGHT and not self.game.is_over and not self.game.is_won():
             self.game.process_left_click(mouse_x, mouse_y)
         elif self.reset_button.is_clicked(mouse_x, mouse_y):
             self.timer.reset()
@@ -98,7 +106,7 @@ class GameHandler:
             self.return_to_menu = True
 
     def process_right_click(self, mouse_x, mouse_y):
-        if mouse_y > TOP_BAR_HEIGHT and not self.game.is_over:
+        if mouse_y > TOP_BAR_HEIGHT and not self.game.is_over and not self.game.is_won():
             self.game.process_right_click(mouse_x, mouse_y)
             self.bombs_count.set_bombs_no(self.bombs_no - self.game.flags_no)
 
@@ -119,11 +127,12 @@ class GameHandler:
             if self.is_timed and self.timer.time == 0:
                 self.game.is_over = True
 
-            if not self.game.is_over:
-                self.timer.update()
-
             if self.game.is_over:
                 self.reset_button.img = load_and_scale_image(DEAD_PATH)
+            elif self.game.is_won():
+                self.reset_button.img = load_and_scale_image(COOL_PATH)
+            else:
+                self.timer.update()
 
             self.draw()
 

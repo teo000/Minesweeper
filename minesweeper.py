@@ -34,6 +34,7 @@ class Square:
         self.position = position
         self.status = status
         self.is_bomb = is_bomb
+        self.is_opened = False
 
     def toggle_flag(self):
         if self.status == CellStatus.UNKNOWN:
@@ -79,6 +80,7 @@ class Minesweeper:
         if clicked_square is None:
             return
         print(f'square {line}, {col} was clicked')
+        clicked_square.is_opened = True
 
         if clicked_square.is_bomb:
             self.is_over = True
@@ -107,7 +109,7 @@ class Minesweeper:
             self.flags_no -= 1
 
     def get_clicked_square(self, mouse_x, mouse_y):
-        col, line = mouse_x // self.SQ_SIZE, (mouse_y - self.top_bar_height) // self.SQ_SIZE
+        col, line = int(mouse_x // self.SQ_SIZE), int((mouse_y - self.top_bar_height) // self.SQ_SIZE)
         if line < 0:
             return None, None, None
         return self.squares[line][col], line, col
@@ -150,6 +152,7 @@ class Minesweeper:
 
                     if not neighbour.is_bomb:
                         neighbour.status = CellStatus(bombs_no)
+                        neighbour.is_opened = True
                         if bombs_no == 0:
                             stack.append((new_x, new_y))
 
@@ -158,3 +161,10 @@ class Minesweeper:
             for square in line:
                 if square.is_bomb:
                     square.status = CellStatus.BOMB
+
+    def is_won(self):
+        for line in self.squares:
+            for square in line:
+                if (not square.is_opened and not square.is_bomb) or (square.is_opened and square.is_bomb):
+                    return False
+        return True
