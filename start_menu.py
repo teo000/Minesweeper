@@ -19,7 +19,7 @@ def menu_loop():
             bombs = bombs_input.get_value()
             if not check_valid(lines, columns, bombs):
                 return
-            difficulty = game_options.GameOptions(lines, columns, bombs)
+            difficulty = game_options.GameOptions(columns, lines, bombs)
         game_handler = GameHandler(difficulty, is_timed, time_limit)
         game_handler.game_loop()
         pygame.display.set_mode((500, 500))

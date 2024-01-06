@@ -4,6 +4,7 @@ from game_options import GameOptions
 from minesweeper import Minesweeper, CellStatus
 
 SQ_SIZE = 30
+TOP_BAR_HEIGHT = 100
 
 IMG_PATHS = {
     CellStatus.UNKNOWN: 'resources/images/blank_cell.png',
@@ -39,9 +40,6 @@ DEAD_PATH = "resources/images/dead.png"
 QUESTION_PATH = "resources/images/question_face.png"
 
 GRAY = (200, 200, 200)
-
-SQ_SIZE = 30
-TOP_BAR_HEIGHT = 100
 
 
 def load_and_scale_image(image_path):
