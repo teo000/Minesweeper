@@ -3,10 +3,9 @@ import pygame_menu
 import game_options
 from gamehandler import GameHandler
 
-
-
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 500
+
 
 def menu_loop():
     def submit_onclick():
@@ -34,28 +33,28 @@ def menu_loop():
 
     def check_valid_options(lines, columns, bombs):
         if lines <= 0:
-            return "Enter a valid number of lines"
+            return 'Enter a valid number of lines'
         if lines > 30:
-            return "Lines should be less than 30"
+            return 'Lines should be less than 30'
         if columns <= 0:
-            return "Enter a valid number of columns"
+            return 'Enter a valid number of columns'
         if columns > 64:
-            return "Columns should be less than 64"
+            return 'Columns should be less than 64'
         if bombs <= 0:
-            return "There must be more at least one bomb"
+            return 'There must be more at least one bomb'
         if bombs > lines * columns:
-            return f"Bombs should be less than {lines * columns}"
+            return f'Bombs should be less than {lines * columns}'
         return None
 
     def show_validation_error(message):
         error_label.set_title(message)
         error_label.show()
-        
+
     def check_valid_timer(is_timed, time_limit):
         if not is_timed:
             return None
         if time_limit <= 0:
-            return "Time limit must be positive"
+            return 'Time limit must be positive'
         return None
 
     def timed_mode_onclick():
@@ -88,8 +87,12 @@ def menu_loop():
     icon_image = pygame.image.load('resources/images/bomb.png')
     pygame.display.set_icon(icon_image)
 
-    items = [('Easy', game_options.EASY), ('Medium', game_options.MEDIUM), ('Hard', game_options.HARD),
-             ('Custom', game_options.CUSTOM)]
+    items = [
+        ('Easy', game_options.EASY),
+        ('Medium', game_options.MEDIUM),
+        ('Hard', game_options.HARD),
+        ('Custom', game_options.CUSTOM)
+    ]
 
     difficulty_selector = menu.add.selector(
         title='Difficulty:\t',
@@ -98,27 +101,39 @@ def menu_loop():
         onchange=select_difficulty
     )
 
-    lines_input = menu.add.text_input("Lines: ", input_type=pygame_menu.locals.INPUT_INT, input_underline='_',
+    lines_input = menu.add.text_input('Lines: ',
+                                      input_type=pygame_menu.locals.INPUT_INT,
+                                      input_underline='_',
                                       maxchar=3)
     lines_input.hide()
-    columns_input = menu.add.text_input("Columns: ", input_type=pygame_menu.locals.INPUT_INT, input_underline='_',
-                                        maxchar=3)
+    columns_input = (
+        menu.add.text_input('Columns: ',
+                            input_type=pygame_menu.locals.INPUT_INT,
+                            input_underline='_',
+                            maxchar=3)
+    )
     columns_input.hide()
-    bombs_input = menu.add.text_input("Bombs: ", input_type=pygame_menu.locals.INPUT_INT, input_underline='_',
+    bombs_input = menu.add.text_input('Bombs: ',
+                                      input_type=pygame_menu.locals.INPUT_INT,
+                                      input_underline='_',
                                       maxchar=5)
     bombs_input.hide()
 
-    not_timed_mode = menu.add.button("Not Timed Mode", not_timed_mode_onclick)
-    timed_mode = menu.add.button("Timed Mode", timed_mode_onclick)
+    not_timed_mode = menu.add.button('Not Timed Mode',
+                                     not_timed_mode_onclick)
+    timed_mode = menu.add.button('Timed Mode', timed_mode_onclick)
     timed_mode.hide()
-    timer_input = menu.add.text_input("Time limit (s): ", input_type=pygame_menu.locals.INPUT_INT, input_underline='_',
+    timer_input = menu.add.text_input('Time limit (s): ',
+                                      input_type=pygame_menu.locals.INPUT_INT,
+                                      input_underline='_',
                                       maxchar=3)
     timer_input.hide()
 
-    error_label = menu.add.label("Error: ", font_color=(255, 50, 50))
+    error_label = menu.add.label('Error: ', font_color=(255, 50, 50))
     error_label.hide()
 
-    menu.add.button('Submit', submit_onclick, background_color=(47, 48, 51), font_color=(255, 255, 255))
+    menu.add.button('Submit', submit_onclick,
+                    background_color=(47, 48, 51), font_color=(255, 255, 255))
 
     menu.mainloop(surface)
 

@@ -44,24 +44,32 @@ class Square:
 
 
 class Minesweeper:
-    def __init__(self, grid_width, grid_height, sq_size, bombs_no, top_bar_height):
+    def __init__(self, grid_width, grid_height, sq_size, bombs_no,
+                 top_bar_height):
         self.BOMBS_NO = bombs_no
         self.SQ_SIZE = sq_size
         self.GRID_HEIGHT = grid_height
         self.GRID_WIDTH = grid_width
         self.top_bar_height = top_bar_height
         self.bombs = self.generate_bombs()
-        self.squares = [[Square((j * self.SQ_SIZE, i * self.SQ_SIZE + self.top_bar_height), CellStatus.UNKNOWN, self.bombs[i][j])
-                         for j in range(grid_width)] for i in range(grid_height)]
+        self.squares = [
+            [Square((j * self.SQ_SIZE,
+                     i * self.SQ_SIZE + self.top_bar_height),
+                    CellStatus.UNKNOWN, self.bombs[i][j])
+             for j in range(grid_width)]
+            for i in range(grid_height)
+        ]
         self.is_over = False
         self.flags_no = 0
 
     def generate_bombs(self):
         bombs_pos = random.sample(
-            [(i, j) for i in range(self.GRID_HEIGHT) for j in range(self.GRID_WIDTH)],
+            [(i, j) for i in range(self.GRID_HEIGHT)
+             for j in range(self.GRID_WIDTH)],
             self.BOMBS_NO
         )
-        bombs = [[False for _ in range(self.GRID_WIDTH)] for _ in range(self.GRID_HEIGHT)]
+        bombs = [[False for _ in range(self.GRID_WIDTH)]
+                 for _ in range(self.GRID_HEIGHT)]
         for pos in bombs_pos:
             bombs[pos[0]][pos[1]] = True
 
@@ -92,15 +100,12 @@ class Minesweeper:
                 clicked_square.status = CellStatus(bombs_no)
             else:
                 clicked_square.status = CellStatus.SAFE
-                # visited = [[False for _ in range(self.GRID_WIDTH)] for _ in range(self.GRID_HEIGHT)]
-                # self.reveal_safe_cells(line, col, visited)
                 self.reveal_safe_cells(line, col)
 
     def process_right_click(self, mouse_x, mouse_y):
         clicked_square, line, col = self.get_clicked_square(mouse_x, mouse_y)
         if clicked_square is None:
             return
-        print(f'square {line}, {col} was right clicked')
         if clicked_square.status == CellStatus.UNKNOWN:
             clicked_square.status = CellStatus.FLAGGED
             self.flags_no += 1
@@ -109,7 +114,8 @@ class Minesweeper:
             self.flags_no -= 1
 
     def get_clicked_square(self, mouse_x, mouse_y):
-        col, line = int(mouse_x // self.SQ_SIZE), int((mouse_y - self.top_bar_height) // self.SQ_SIZE)
+        col, line = (int(mouse_x // self.SQ_SIZE),
+                     int((mouse_y - self.top_bar_height) // self.SQ_SIZE))
         if line < 0:
             return None, None, None
         return self.squares[line][col], line, col
@@ -117,25 +123,16 @@ class Minesweeper:
     def compute_bombs_near(self, x, y):
         bombs_no = 0
         for dir in Direction:
-            if (0 <= x+dir.value[0] < self.GRID_HEIGHT and 0 <= y + dir.value[1] < self.GRID_WIDTH
-                    and self.squares[x + dir.value[0]][y + dir.value[1]].is_bomb):
+            if (0 <= x + dir.value[0] < self.GRID_HEIGHT
+                    and 0 <= y + dir.value[1] < self.GRID_WIDTH
+                    and self.squares[x + dir.value[0]]
+                    [y + dir.value[1]].is_bomb):
                 bombs_no += 1
         return bombs_no
 
-    # def reveal_safe_cells(self, x, y, visited):
-    #     visited[x][y] = True
-    #     for dir in Direction:
-    #         if (0 <= x + dir.value[0] < self.GRID_HEIGHT and 0 <= y + dir.value[1] < self.GRID_WIDTH and
-    #                 not visited[x + dir.value[0]][y + dir.value[1]]):
-    #             neighbour = self.squares[x + dir.value[0]][y + dir.value[1]]
-    #             bombs_no = self.compute_bombs_near(x + dir.value[0], y + dir.value[1])
-    #             if not neighbour.is_bomb:
-    #                 neighbour.status = CellStatus(bombs_no)
-    #                 if bombs_no == 0:
-    #                     self.reveal_safe_cells(x + dir.value[0], y + dir.value[1], visited)
-
     def reveal_safe_cells(self, x, y):
-        visited = [[False for _ in range(self.GRID_WIDTH)] for _ in range(self.GRID_HEIGHT)]
+        visited = [[False for _ in range(self.GRID_WIDTH)]
+                   for _ in range(self.GRID_HEIGHT)]
         stack = [(x, y)]
 
         while len(stack) > 0:
@@ -145,8 +142,9 @@ class Minesweeper:
             for dir in Direction:
                 new_x, new_y = x + dir.value[0], y + dir.value[1]
 
-                if (0 <= new_x < self.GRID_HEIGHT and 0 <= new_y < self.GRID_WIDTH and
-                        not visited[new_x][new_y]):
+                if (0 <= new_x < self.GRID_HEIGHT
+                        and 0 <= new_y < self.GRID_WIDTH
+                        and not visited[new_x][new_y]):
                     neighbour = self.squares[new_x][new_y]
                     bombs_no = self.compute_bombs_near(new_x, new_y)
 
@@ -165,6 +163,7 @@ class Minesweeper:
     def is_won(self):
         for line in self.squares:
             for square in line:
-                if (not square.is_opened and not square.is_bomb) or (square.is_opened and square.is_bomb):
+                if ((not square.is_opened and not square.is_bomb)
+                        or (square.is_opened and square.is_bomb)):
                     return False
         return True
