@@ -46,6 +46,26 @@ class Square:
 class Minesweeper:
     def __init__(self, grid_width, grid_height, sq_size, bombs_no,
                  top_bar_height):
+        """
+        The Minesweeper game
+
+        Parameters:
+        - grid_width (int): The width of the game grid.
+        - grid_height (int): The height of the game grid.
+        - sq_size (int): The size of each square in pixels.
+        - bombs_no (int): The number of bombs in the game.
+        - top_bar_height (int): The height of the top bar of the game window.
+
+        Attributes:
+        - BOMBS_NO (int): The number of bombs in the game.
+        - SQ_SIZE (int): The size of each square in pixels.
+        - GRID_HEIGHT (int): The height of the game grid.
+        - GRID_WIDTH (int): The width of the game grid.
+        - bombs (list): A matrix representing bomb locations in the game grid.
+        - squares (list): A matrix representing the squares in the game grid.
+        - is_over (bool): Indicates if the game is over.
+        - flags_no (int): The number of flags placed on the grid.
+        """
         self.BOMBS_NO = bombs_no
         self.SQ_SIZE = sq_size
         self.GRID_HEIGHT = grid_height
@@ -63,6 +83,12 @@ class Minesweeper:
         self.flags_no = 0
 
     def generate_bombs(self):
+        """
+            Generates bomb positions within the game grid.
+
+            Returns:
+            - a matrix representing bomb positions in the game grid,
+        """
         bombs_pos = random.sample(
             [(i, j) for i in range(self.GRID_HEIGHT)
              for j in range(self.GRID_WIDTH)],
@@ -84,6 +110,14 @@ class Minesweeper:
         return bombs
 
     def process_left_click(self, mouse_x, mouse_y):
+        """
+            Processes a left-click event on the game grid based on the mouse
+            coordinates.
+
+            Parameters:
+            - mouse_x (int): The x-coordinate of the mouse click.
+            - mouse_y (int): The y-coordinate of the mouse click.
+        """
         clicked_square, line, col = self.get_clicked_square(mouse_x, mouse_y)
         if clicked_square is None:
             return
@@ -103,6 +137,14 @@ class Minesweeper:
                 self.reveal_safe_cells(line, col)
 
     def process_right_click(self, mouse_x, mouse_y):
+        """
+            Processes a right-click event on the game grid based on the mouse
+            coordinates.
+
+            Parameters:
+            - mouse_x (int): The x-coordinate of the mouse click.
+            - mouse_y (int): The y-coordinate of the mouse click.
+        """
         clicked_square, line, col = self.get_clicked_square(mouse_x, mouse_y)
         if clicked_square is None:
             return
@@ -114,23 +156,52 @@ class Minesweeper:
             self.flags_no -= 1
 
     def get_clicked_square(self, mouse_x, mouse_y):
+        """
+            Determines the square clicked based on the mouse coordinates.
+
+            Parameters:
+            - mouse_x (int): The x-coordinate of the mouse click.
+            - mouse_y (int): The y-coordinate of the mouse click.
+
+            Returns:
+            - tuple: A tuple containing the clicked square, line, and column if
+             within the grid, or (None, None, None) if the click is outside the
+             grid.
+        """
         col, line = (int(mouse_x // self.SQ_SIZE),
                      int((mouse_y - self.top_bar_height) // self.SQ_SIZE))
         if line < 0:
             return None, None, None
         return self.squares[line][col], line, col
 
-    def compute_bombs_near(self, x, y):
+    def compute_bombs_near(self, line, column):
+        """
+            Computes the number of bombs adjacent to the given square.
+
+            Parameters:
+            - line (int): The line the square is on.
+            - column (int): The column the square is on.
+
+            Returns:
+            - int: The number of bombs adjacent to the given grid position.
+        """
         bombs_no = 0
         for dir in Direction:
-            if (0 <= x + dir.value[0] < self.GRID_HEIGHT
-                    and 0 <= y + dir.value[1] < self.GRID_WIDTH
-                    and self.squares[x + dir.value[0]]
-                    [y + dir.value[1]].is_bomb):
+            if (0 <= line + dir.value[0] < self.GRID_HEIGHT
+                    and 0 <= column + dir.value[1] < self.GRID_WIDTH
+                    and self.squares[line + dir.value[0]]
+                    [column + dir.value[1]].is_bomb):
                 bombs_no += 1
         return bombs_no
 
     def reveal_safe_cells(self, x, y):
+        """
+            Reveals adjacent safe cells starting from the given square.
+
+            Parameters:
+            - x (int): The line the square is on.
+            - y (int): The column the square is on.
+        """
         visited = [[False for _ in range(self.GRID_WIDTH)]
                    for _ in range(self.GRID_HEIGHT)]
         stack = [(x, y)]
@@ -155,12 +226,18 @@ class Minesweeper:
                             stack.append((new_x, new_y))
 
     def reveal_bombs(self):
+        """
+            Reveals all bombs.
+        """
         for line in self.squares:
             for square in line:
                 if square.is_bomb:
                     square.status = CellStatus.BOMB
 
     def is_won(self):
+        """
+           Checks if the game has been won.
+        """
         for line in self.squares:
             for square in line:
                 if ((not square.is_opened and not square.is_bomb)

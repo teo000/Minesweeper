@@ -57,6 +57,18 @@ def load_and_scale_image(image_path):
 class GameHandler:
     def __init__(self, game_options: GameOptions,
                  is_timed=False, time_limit=None):
+        """
+            The GameHandler class which contains the game grid as well as the
+            elements in the top bar.
+
+            Parameters:
+            - game_options (GameOptions): An instance of GameOptions containing
+             game configuration.
+            - is_timed (bool, optional): Determines if the game is timed,
+             default false
+            - time_limit (int, optional): Time limit for the game,
+             default None.
+        """
         self.is_timed = is_timed
         self.bombs_no = game_options.bombs_no
         self.grid_height = game_options.grid_height
@@ -87,6 +99,9 @@ class GameHandler:
         self.return_to_menu = False
 
     def draw(self):
+        """
+            Draws the game elements on the screen
+        """
         self.screen.fill(GRAY)
 
         for row in self.game.squares:
@@ -100,6 +115,13 @@ class GameHandler:
             self.timer.draw(self.screen)
 
     def process_left_click(self, mouse_x, mouse_y):
+        """
+            Processes a left-click event based on the mouse coordinates.
+
+            Parameters:
+            - mouse_x (int): The x-coordinate of the mouse click.
+            - mouse_y (int): The y-coordinate of the mouse click.
+        """
         if (mouse_y > TOP_BAR_HEIGHT and not self.game.is_over
                 and not self.game.is_won()):
             self.game.process_left_click(mouse_x, mouse_y)
@@ -113,12 +135,22 @@ class GameHandler:
             self.return_to_menu = True
 
     def process_right_click(self, mouse_x, mouse_y):
+        """
+            Processes a right-click event based on the mouse coordinates.
+
+            Parameters:
+            - mouse_x (int): The x-coordinate of the mouse click.
+            - mouse_y (int): The y-coordinate of the mouse click.
+        """
         if (mouse_y > TOP_BAR_HEIGHT and not self.game.is_over
                 and not self.game.is_won()):
             self.game.process_right_click(mouse_x, mouse_y)
             self.bombs_count.set_bombs_no(self.bombs_no - self.game.flags_no)
 
     def game_loop(self):
+        """
+            The main game loop.
+        """
         clock = pygame.time.Clock()
 
         while not self.return_to_menu:
@@ -150,6 +182,14 @@ class GameHandler:
 
 class Button:
     def __init__(self, img_path, x, y):
+        """
+            Initializes a Button instance with an image and position.
+
+            Parameters:
+            - img_path (str): The file path of the image for the button.
+            - x (int): The x-coordinate of the button's top-left corner.
+            - y (int): The y-coordinate of the button's top-left corner.
+        """
         self.rect = pygame.Rect(x, y, BTN_SIZE, BTN_SIZE)
         self.img = load_and_scale_image(img_path)
 
@@ -168,6 +208,15 @@ default_font = pygame.font.get_default_font()
 
 class Counter:
     def __init__(self, x, y, width, height):
+        """
+            Initializes a Counter instance with a dimension and position.
+
+            Parameters:
+            - x (int): The x-coordinate of the counter's top-left corner.
+            - y (int): The y-coordinate of the counter's top-left corner.
+            - width (int): The width of the counter.
+            - height (int): The height of the counter.
+        """
         self.rect = pygame.Rect(x, y, width, height)
         self.font = pygame.font.Font(default_font, 28)
         self.surface = pygame.Surface((width, height))
@@ -177,6 +226,15 @@ class Counter:
 
 
 class BombsCount(Counter):
+    """
+        Initializes a BombsCounter instance with a dimension and position.
+
+        Parameters:
+        - x (int): The x-coordinate of the counter's top-left corner.
+        - y (int): The y-coordinate of the counter's top-left corner.
+        - width (int): The width of the counter.
+        - height (int): The height of the counter.
+    """
     def __init__(self, x, y, width, height):
         super().__init__(x, y, width, height)
 
@@ -190,6 +248,21 @@ class BombsCount(Counter):
 class Timer(Counter):
     def __init__(self, x, y, width, height,
                  count_backwards=False, time_limit=None):
+        """
+            Initializes a Timer instance to display time in a game.
+
+            Parameters:
+            - x (int): The x-coordinate of the timer's top-left corner.
+            - y (int): The y-coordinate of the timer's top-left corner.
+            - width (int): The width of the timer.
+            - height (int): The height of the timer.
+            - count_backwards (bool): Determines if the Timer counts backwards.
+             Default is False.
+            - time_limit (int): The time limit for the Timer. Default is None.
+
+             Attributes:
+            - get_current_time (function): Method to determine the current time counting direction.
+        """
         super().__init__(x, y, width, height)
         self.initial_time = pygame.time.get_ticks()
         self.time_limit = time_limit + 1 if time_limit is not None else None

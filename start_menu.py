@@ -8,6 +8,9 @@ SCREEN_HEIGHT = 500
 
 
 def menu_loop():
+    """
+    The main menu loop for the minesweeper game.
+    """
     def submit_onclick():
         difficulty = difficulty_selector.get_value()[0][1]
         is_timed = timed_mode.is_visible()
